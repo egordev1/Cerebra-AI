@@ -111,12 +111,15 @@ class CerebraAI:
             print(f"✅ Модель {model_name} готова к использованию")
             return self.active_model
             
-        except torch.cuda.OutOfMemoryError as e:
-            logger.error(f"Ошибка нехватки видеопамяти при загрузке модели {model_name}: {e}")
-            print(f"❌ Ошибка нехватки видеопамяти при загрузке {model_name}")
-            # Очищаем кэш CUDA если доступна
+        except (torch.cuda.OutOfMemoryError, RuntimeError) as e:
+            logger.error(f"Ошибка нехватки памяти при загрузке модели {model_name}: {e}")
+            print(f"❌ Ошибка нехватки памяти при загрузке {model_name}")
+            # Очищаем кэш если доступен CUDA
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
+            # Очищаем кэш для MPS и CPU
+            import gc
+            gc.collect()
             return None
         except MemoryError as e:
             logger.error(f"Ошибка нехватки оперативной памяти при загрузке модели {model_name}: {e}")
