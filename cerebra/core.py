@@ -50,6 +50,20 @@ class Cerebra:
                 self.active_model = self.active_model.to(self.device)
                 logger.info(f"✅ Загружена модель: {model_name} на {self.device}")
                 print(f"✅ Загружена модель: {model_name}")
+            elif model_name == "Synthesis-L2":
+                from .models.advanced_transformer import SynthesisL2
+                logger.info(f"Загрузка модели {model_name} на устройство {self.device}...")
+                self.active_model = SynthesisL2()
+                self.active_model = self.active_model.to(self.device)
+                logger.info(f"✅ Загружена модель: {model_name} на {self.device}")
+                print(f"✅ Загружена модель: {model_name}")
+            elif model_name == "Synthesis-L3":
+                from .models.advanced_transformer import SynthesisL3
+                logger.info(f"Загрузка модели {model_name} на устройство {self.device}...")
+                self.active_model = SynthesisL3()
+                self.active_model = self.active_model.to(self.device)
+                logger.info(f"✅ Загружена модель: {model_name} на {self.device}")
+                print(f"✅ Загружена модель: {model_name}")
             else:
                 logger.error(f"Модель {model_name} не найдена")
                 print(f"❌ Модель {model_name} не найдена")
@@ -62,8 +76,15 @@ class Cerebra:
                 logger.warning("Попытка загрузить модель на CPU вместо CUDA")
                 self.device = torch.device('cpu')
                 try:
-                    from .models.main_model import SynthesisL1
-                    self.active_model = SynthesisL1().to(self.device)
+                    if model_name == "Synthesis-L1":
+                        from .models.main_model import SynthesisL1
+                        self.active_model = SynthesisL1().to(self.device)
+                    elif model_name == "Synthesis-L2":
+                        from .models.advanced_transformer import SynthesisL2
+                        self.active_model = SynthesisL2().to(self.device)
+                    elif model_name == "Synthesis-L3":
+                        from .models.advanced_transformer import SynthesisL3
+                        self.active_model = SynthesisL3().to(self.device)
                     logger.info(f"✅ Модель загружена на CPU")
                     print(f"✅ Загружена модель: {model_name} на CPU (fallback)")
                     return self.active_model
@@ -189,12 +210,15 @@ class Cerebra:
 
 Доступные модели:
 • Synthesis-L1 - GPT трансформерная модель (текстовая генерация)
-• Synthesis-L2 - в разработке
-• Synthesis-L3 - в разработке
+• Synthesis-L2 - Продвинутая GPT-3 подобная модель (улучшенная архитектура)
+• Synthesis-L3 - Ещё более продвинутая модель (масштабированная архитектура)
 """
         if self.active_model:
-            model_info = self.active_model.get_info()
-            info_text += f"\n🎯 Активная модель: {model_info['model_id']}"
-            info_text += f"\n📈 Параметров: {model_info['parameters']:,}"
+            if hasattr(self.active_model, 'get_info'):
+                model_info = self.active_model.get_info()
+                info_text += f"\n🎯 Активная модель: {model_info['model_id']}"
+                info_text += f"\n📈 Параметров: {model_info['parameters']:,}"
+            else:
+                info_text += f"\n🎯 Активная модель: {self.active_model.model_id if hasattr(self.active_model, 'model_id') else 'Неизвестная модель'}"
         
         return info_text

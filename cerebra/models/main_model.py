@@ -19,18 +19,37 @@ except ImportError:
 # Импорт GPT модели и токенизатора
 try:
     from .gpt_model import GPTTransformer
+    from .advanced_transformer import SynthesisL2, SynthesisL3
     from .tokenizer import SimpleTokenizer
     from .training import prepare_training_data, train_gpt_model
     GPT_AVAILABLE = True
+    ADVANCED_MODELS_AVAILABLE = True
 except ImportError:
     try:
         from cerebra.models.gpt_model import GPTTransformer
+        from cerebra.models.advanced_transformer import SynthesisL2, SynthesisL3
         from cerebra.models.tokenizer import SimpleTokenizer
         from cerebra.models.training import prepare_training_data, train_gpt_model
         GPT_AVAILABLE = True
+        ADVANCED_MODELS_AVAILABLE = True
     except ImportError:
-        GPT_AVAILABLE = False
-        logger.warning("GPT компоненты недоступны, используется старая LSTM модель")
+        try:
+            from .gpt_model import GPTTransformer
+            from .tokenizer import SimpleTokenizer
+            from .training import prepare_training_data, train_gpt_model
+            GPT_AVAILABLE = True
+            ADVANCED_MODELS_AVAILABLE = False
+        except ImportError:
+            try:
+                from cerebra.models.gpt_model import GPTTransformer
+                from cerebra.models.tokenizer import SimpleTokenizer
+                from cerebra.models.training import prepare_training_data, train_gpt_model
+                GPT_AVAILABLE = True
+                ADVANCED_MODELS_AVAILABLE = False
+            except ImportError:
+                GPT_AVAILABLE = False
+                ADVANCED_MODELS_AVAILABLE = False
+                logger.warning("GPT компоненты недоступны, используется старая LSTM модель")
 
 # Импорт сборщика диалогов
 try:

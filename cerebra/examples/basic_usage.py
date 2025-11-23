@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 Пример использования Cerebra AI
+Обновленный пример с поддержкой всех моделей (L1, L2, L3)
 """
 
 import sys
@@ -28,38 +29,65 @@ def main():
     # Информация о системе
     print_system_info()
     
-    # Загрузка модели
-    print("\n1. Загрузка модели...")
-    model = ai.load_model("Synthesis-L1")
+    # Загрузка и тестирование разных моделей
+    models_to_test = ["Synthesis-L1", "Synthesis-L2", "Synthesis-L3"]
     
-    # Информация о системе
-    print("\n2. Информация о системе:")
-    print(ai.info())
+    for model_name in models_to_test:
+        print(f"\n{'='*60}")
+        print(f"🧪 Тестирование модели: {model_name}")
+        print(f"{'='*60}")
+        
+        # Загрузка модели
+        print(f"1. Загрузка модели {model_name}...")
+        model = ai.load_model(model_name)
+        
+        if model:
+            # Информация о модели
+            print(f"\n2. Информация о модели:")
+            print(ai.info())
+            
+            # Тест диалога
+            print(f"\n3. Тест диалога с {model_name}:")
+            test_messages = [
+                "привет Cerebra",
+                "расскажи о себе",
+                f"что ты можешь как {model_name}?",
+                "как работает трансформер?",
+                "пока"
+            ]
+            
+            for message in test_messages:
+                response = ai.chat(message)
+                print(f"👤: {message}")
+                print(f"🤖: {response}\n")
+            
+            # Сохранение модели
+            print(f"4. Сохранение модели {model_name}...")
+            ai.save_model(f"models/synthesis_{model_name.split('-')[1].lower()}_demo.pth")
+        else:
+            print(f"❌ Не удалось загрузить модель {model_name}")
     
-    # Тест диалога
-    print("\n3. Тест диалога:")
-    test_messages = [
-        "привет Cerebra",
-        "расскажи о себе",
-        "что такое Synthesis-L1?",
-        "как тебя обучать?",
-        "пока"
-    ]
+    # Демонстрация смены моделей
+    print(f"\n{'='*60}")
+    print("🔄 Демонстрация смены моделей")
+    print(f"{'='*60}")
     
-    for message in test_messages:
-        response = ai.chat(message)
-        print(f"👤: {message}")
-        print(f"🤖: {response}\n")
+    # Переключение на L2
+    ai.load_model("Synthesis-L2")
+    print("\n💬 Переключение на L2:")
+    response = ai.chat("Теперь ты используешь более продвинутую архитектуру L2?")
+    print(f"🤖: {response}")
     
-    # Демонстрация обучения
-    print("\n4. Демонстрация обучения:")
-    ai.train_model(epochs=2)
+    # Переключение на L3
+    ai.load_model("Synthesis-L3")
+    print("\n💬 Переключение на L3:")
+    response = ai.chat("Теперь ты используешь масштабированную архитектуру L3?")
+    print(f"🤖: {response}")
     
-    # Сохранение модели
-    print("\n5. Сохранение модели...")
-    ai.save_model("models/synthesis_l1_demo.pth")
+    # Возврат к L1
+    ai.load_model("Synthesis-L1")
     
-    print("\n🎉 Cerebra AI готова к работе!")
+    print(f"\n🎉 Cerebra AI с поддержкой всех моделей готова к работе!")
 
 if __name__ == "__main__":
     main()
