@@ -51,9 +51,12 @@ class CerebraAI:
     
     def load_model(self, model_name="Synthesis-L1", quantize=False, quantization_method='dynamic'):
         try:
+            logger.info(f"Загрузка модели {model_name} на устройство {self.device}...")
+            print(f"\n📦 Загрузка модели {model_name}...")
+            
             if model_name == "Synthesis-L1":
                 from .models.main_model import SynthesisL1
-                logger.info(f"Загрузка модели {model_name} на устройство {self.device}...")
+                logger.info(f"Инициализация {model_name}...")
                 self.active_model = SynthesisL1(use_gpt=True)
                 
                 # Перемещаем модель на устройство
@@ -62,35 +65,70 @@ class CerebraAI:
                 self.active_model = self.active_model.to(self.device)
                 logger.info(f"✅ Загружена модель: {model_name} на {self.device}")
                 print(f"✅ Загружена модель: {model_name}")
+                
             elif model_name == "Synthesis-L2":
                 from .models.advanced_transformer import SynthesisL2
-                logger.info(f"Загрузка модели {model_name} на устройство {self.device}...")
-                self.active_model = SynthesisL2()
-                self.active_model = self.active_model.to(self.device)
+                logger.info(f"Инициализация {model_name}...")
+                # Используем torch.no_grad() и eval режим для экономии памяти при инициализации
+                with torch.no_grad():
+                    self.active_model = SynthesisL2()
+                    # Переводим в eval режим сразу после создания
+                    self.active_model.eval()
+                    # Перемещаем на устройство
+                    self.active_model = self.active_model.to(self.device)
                 logger.info(f"✅ Загружена модель: {model_name} на {self.device}")
                 print(f"✅ Загружена модель: {model_name}")
+                
             elif model_name == "Synthesis-L3":
                 from .models.advanced_transformer import SynthesisL3
-                logger.info(f"Загрузка модели {model_name} на устройство {self.device}...")
-                self.active_model = SynthesisL3()
-                self.active_model = self.active_model.to(self.device)
+                logger.info(f"Инициализация {model_name}...")
+                # Используем torch.no_grad() и eval режим для экономии памяти при инициализации
+                with torch.no_grad():
+                    self.active_model = SynthesisL3()
+                    # Переводим в eval режим сразу после создания
+                    self.active_model.eval()
+                    # Перемещаем на устройство
+                    self.active_model = self.active_model.to(self.device)
                 logger.info(f"✅ Загружена модель: {model_name} на {self.device}")
                 print(f"✅ Загружена модель: {model_name}")
+                
             else:
                 logger.error(f"Модель {model_name} не найдена")
                 print(f"❌ Модель {model_name} не найдена")
                 return None
             
-            # Применяем квантование если нужно
+            # Применяем квантование если нужно (это поможет уменьшить потребление памяти)
             if quantize:
                 logger.info(f"Применение {quantization_method} квантования к модели...")
+                # Очищаем кэш перед квантованием
+                import gc
+                gc.collect()
                 self.active_model = self.quantizer.apply_quantization(self.active_model, method=quantization_method)
                 logger.info(f"✅ Квантование {quantization_method} применено")
                 print(f"✅ Квантование {quantization_method} применено")
             
+            logger.info(f"Модель {model_name} успешно загружена")
+            print(f"✅ Модель {model_name} готова к использованию")
             return self.active_model
+            
+        except torch.cuda.OutOfMemoryError as e:
+            logger.error(f"Ошибка нехватки видеопамяти при загрузке модели {model_name}: {e}")
+            print(f"❌ Ошибка нехватки видеопамяти при загрузке {model_name}")
+            # Очищаем кэш CUDA если доступна
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+            return None
+        except MemoryError as e:
+            logger.error(f"Ошибка нехватки оперативной памяти при загрузке модели {model_name}: {e}")
+            print(f"❌ Ошибка нехватки оперативной памяти при загрузке {model_name}")
+            # Пытаемся освободить память
+            import gc
+            gc.collect()
+            return None
         except Exception as e:
             logger.error(f"Ошибка при загрузке модели: {e}", exc_info=True)
+            print(f"❌ Ошибка при загрузке модели {model_name}: {e}")
+            
             # Fallback на CPU если CUDA недоступна
             if self.device.type == 'cuda':
                 logger.warning("Попытка загрузить модель на CPU вместо CUDA")
@@ -101,15 +139,24 @@ class CerebraAI:
                         self.active_model = SynthesisL1().to(self.device)
                     elif model_name == "Synthesis-L2":
                         from .models.advanced_transformer import SynthesisL2
-                        self.active_model = SynthesisL2().to(self.device)
+                        # Используем torch.no_grad() и eval режим для экономии памяти
+                        with torch.no_grad():
+                            self.active_model = SynthesisL2()
+                            self.active_model.eval()
+                        self.active_model = self.active_model.to(self.device)
                     elif model_name == "Synthesis-L3":
                         from .models.advanced_transformer import SynthesisL3
-                        self.active_model = SynthesisL3().to(self.device)
+                        # Используем torch.no_grad() и eval режим для экономии памяти
+                        with torch.no_grad():
+                            self.active_model = SynthesisL3()
+                            self.active_model.eval()
+                        self.active_model = self.active_model.to(self.device)
                     logger.info(f"✅ Модель загружена на CPU")
                     print(f"✅ Загружена модель: {model_name} на CPU (fallback)")
                     return self.active_model
                 except Exception as e2:
                     logger.error(f"Ошибка при загрузке на CPU: {e2}", exc_info=True)
+                    print(f"❌ Ошибка при загрузке на CPU: {e2}")
             return None
     
     def chat(self, message, use_web_search=False, use_plugins=True):
