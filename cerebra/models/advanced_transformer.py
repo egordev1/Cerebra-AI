@@ -108,9 +108,9 @@ class AdvancedTransformerBlock(nn.Module):
 
 
 class SynthesisL2(nn.Module):
-    """Продвинутая GPT-3 подобная модель (Synthesis-L2)"""
-    def __init__(self, vocab_size: int = 15000, d_model: int = 768, n_heads: int = 12, 
-                 n_layers: int = 12, d_ff: int = 3072, max_seq_len: int = 1024, dropout: float = 0.1):
+    """Продвинутая GPT-3 подобная модель (Synthesis-L2) - оптимизированная версия"""
+    def __init__(self, vocab_size: int = 8000, d_model: int = 384, n_heads: int = 6, 
+                 n_layers: int = 6, d_ff: int = 1536, max_seq_len: int = 512, dropout: float = 0.1):
         super().__init__()
         self.model_id = "Synthesis-L2"
         self.version = "3.0.0"
@@ -142,7 +142,7 @@ class SynthesisL2(nn.Module):
         logger.info(f"🎯 Создана {self.model_id} v{self.version}")
         logger.info(f"   Параметров: {sum(p.numel() for p in self.parameters()):,}")
         print(f"🎯 Создана {self.model_id} v{self.version}")
-        print(f"   Параметров: {sum(p.numel() for p in self.parameters()):,}")
+        print(f"   Параметров: ~{sum(p.numel() for p in self.parameters()):,}")
     
     def _init_weights(self, module):
         """Улучшенная инициализация весов"""
@@ -275,9 +275,9 @@ class SynthesisL2(nn.Module):
 
 
 class SynthesisL3(nn.Module):
-    """Еще более продвинутая модель (Synthesis-L3) с MoE (Mixture of Experts)"""
-    def __init__(self, vocab_size: int = 20000, d_model: int = 1024, n_heads: int = 16, 
-                 n_layers: int = 24, d_ff: int = 4096, max_seq_len: int = 2048, dropout: float = 0.1):
+    """Еще более продвинутая модель (Synthesis-L3) с MoE (Mixture of Experts) - оптимизированная версия"""
+    def __init__(self, vocab_size: int = 10000, d_model: int = 384, n_heads: int = 6, 
+                 n_layers: int = 8, d_ff: int = 1536, max_seq_len: int = 512, dropout: float = 0.1):
         super().__init__()
         self.model_id = "Synthesis-L3"
         self.version = "4.0.0"
@@ -306,7 +306,7 @@ class SynthesisL3(nn.Module):
         logger.info(f"🎯 Создана {self.model_id} v{self.version}")
         logger.info(f"   Параметров: {sum(p.numel() for p in self.parameters()):,}")
         print(f"🎯 Создана {self.model_id} v{self.version}")
-        print(f"   Параметров: {sum(p.numel() for p in self.parameters()):,}")
+        print(f"   Параметров: ~{sum(p.numel() for p in self.parameters()):,}")
     
     def _init_weights(self, module):
         """Улучшенная инициализация весов"""

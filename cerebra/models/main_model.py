@@ -74,12 +74,12 @@ class SynthesisL1(nn.Module):
             # GPT Transformer модель
             self.tokenizer = SimpleTokenizer(vocab_size=10000)
             self.gpt_model = GPTTransformer(
-                vocab_size=10000,
-                d_model=512,
-                n_heads=8,
-                n_layers=6,
-                d_ff=2048,
-                max_seq_len=512,
+                vocab_size=8000,
+                d_model=256,
+                n_heads=4,
+                n_layers=4,
+                d_ff=1024,
+                max_seq_len=256,
                 dropout=0.1
             )
             

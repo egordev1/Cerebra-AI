@@ -184,9 +184,9 @@ def change_model():
     logger.info("🔄 СМЕНА МОДЕЛИ")
     print("\n🔄 СМЕНА МОДЕЛИ")
     print("Доступные модели:")
-    print("1. Synthesis-L1 - Базовая GPT модель (~29M параметров)")
-    print("2. Synthesis-L2 - Продвинутая GPT-3 подобная модель (~220M параметров)")
-    print("3. Synthesis-L3 - Масштабированная модель (~1.3B параметров)")
+    print("1. Synthesis-L1 - Базовая GPT модель (~7M параметров)")
+    print("2. Synthesis-L2 - Продвинутая GPT-3 подобная модель (~17M параметров)")
+    print("3. Synthesis-L3 - Масштабированная модель (~50M параметров)")
     
     try:
         choice = input("\nВыберите модель (1-3): ").strip()
@@ -201,13 +201,46 @@ def change_model():
             print("❌ Неверный выбор!")
             return
         
-        logger.info(f"Загрузка модели {model_name}...")
+        # Предлагаем использовать квантование для более крупных моделей
+        use_quantization = False
+        quantization_method = 'dynamic'
+        if model_name in ["Synthesis-L2", "Synthesis-L3"]:
+            print(f"\n💡 Модель {model_name} требует много памяти.")
+            quant_choice = input("Использовать квантование для уменьшения потребления памяти? (y/n, по умолчанию n): ").strip().lower()
+            if quant_choice == 'y':  # Теперь по умолчанию не используем квантование
+                use_quantization = True
+                print("\nМетоды квантования:")
+                print("1. dynamic - динамическое квантование (рекомендуется)")
+                print("2. static - статическое квантование")
+                print("3. mixed - смешанная точность")
+                quant_method_choice = input("Выберите метод квантования (1-3, по умолчанию 1): ").strip()
+                
+                if quant_method_choice == '2':
+                    quantization_method = 'static'
+                elif quant_method_choice == '3':
+                    quantization_method = 'mixed'
+                else:
+                    quantization_method = 'dynamic'  # по умолчанию
+                
+                print(f"Используется метод квантования: {quantization_method}")
+        
+        logger.info(f"Загрузка модели {model_name} с квантованием: {use_quantization} ({quantization_method})...")
         print(f"\n📦 Загрузка модели {model_name}...")
-        model = ai.load_model(model_name)
+        if use_quantization:
+            print(f"   Квантование: {quantization_method}")
+        
+        model = ai.load_model(model_name, quantize=use_quantization, quantization_method=quantization_method)
         
         if model:
             logger.info(f"Модель {model_name} успешно загружена")
             print(f"✅ Модель {model_name} загружена!")
+            
+            # Показываем информацию о модели
+            if hasattr(model, 'get_info'):
+                info = model.get_info()
+                if 'parameters' in info:
+                    params = info['parameters']
+                    print(f"   Параметров: {params:,}")
         else:
             logger.error(f"Не удалось загрузить модель {model_name}")
             print(f"❌ Не удалось загрузить модель {model_name}!")
