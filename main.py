@@ -31,7 +31,7 @@ def show_menu():
     stats = ai.get_dialogue_stats()
     print("\n" + "="*60)
     print("🧠 CEREBRA AI - ГЛАВНОЕ МЕНЮ")
-    print("🤖 Модель: Synthesis-L1")
+    print("🤖 Модель: Synthesis-L1/L2/L3")
     print("="*60)
     print("1. 💬 Чат с ИИ (с веб-поиском)")
     print("2. 🎓 Обучение модели (на реальных диалогах)")
@@ -39,6 +39,7 @@ def show_menu():
     print("4. ℹ️  Информация о системе")
     print("5. 💾 Сохранить модель")
     print("6. 🗑️  Очистить историю диалогов")
+    print("8. 🧠 Сменить модель ИИ")
     print("7. 🚪 Выход")
     if stats['total_dialogues'] > 0:
         print(f"\n📊 Статистика: {stats['total_dialogues']} диалогов, {stats['total_exchanges']} обменов")
@@ -178,6 +179,47 @@ def web_search_mode():
         print("\n\n👋 Поиск завершен")
 
 
+def change_model():
+    """Смена модели ИИ"""
+    logger.info("🔄 СМЕНА МОДЕЛИ")
+    print("\n🔄 СМЕНА МОДЕЛИ")
+    print("Доступные модели:")
+    print("1. Synthesis-L1 - Базовая GPT модель (~29M параметров)")
+    print("2. Synthesis-L2 - Продвинутая GPT-3 подобная модель (~220M параметров)")
+    print("3. Synthesis-L3 - Масштабированная модель (~1.3B параметров)")
+    
+    try:
+        choice = input("\nВыберите модель (1-3): ").strip()
+        
+        if choice == '1':
+            model_name = "Synthesis-L1"
+        elif choice == '2':
+            model_name = "Synthesis-L2"
+        elif choice == '3':
+            model_name = "Synthesis-L3"
+        else:
+            print("❌ Неверный выбор!")
+            return
+        
+        logger.info(f"Загрузка модели {model_name}...")
+        print(f"\n📦 Загрузка модели {model_name}...")
+        model = ai.load_model(model_name)
+        
+        if model:
+            logger.info(f"Модель {model_name} успешно загружена")
+            print(f"✅ Модель {model_name} загружена!")
+        else:
+            logger.error(f"Не удалось загрузить модель {model_name}")
+            print(f"❌ Не удалось загрузить модель {model_name}!")
+            
+    except (KeyboardInterrupt, EOFError):
+        logger.info("Смена модели прервана пользователем")
+        print("\n\n👋 Смена модели прервана")
+    except Exception as e:
+        logger.error(f"Ошибка при смене модели: {e}", exc_info=True)
+        print(f"❌ Ошибка: {e}")
+
+
 def clear_dialogues():
     """Очистка истории диалогов"""
     logger.info("🗑️ ОЧИСТКА ДИАЛОГОВ")
@@ -237,7 +279,7 @@ def main():
     try:
         while True:
             show_menu()
-            choice = input("\nВыберите действие (1-7): ").strip()
+            choice = input("\nВыберите действие (1-8): ").strip()
             
             if choice == '1':
                 chat_mode()
@@ -257,6 +299,8 @@ def main():
                     print("✅ Модель сохранена!")
             elif choice == '6':
                 clear_dialogues()
+            elif choice == '8':
+                change_model()
             elif choice == '7':
                 logger.info("Выход из приложения")
                 print("\n👋 До свидания!")
