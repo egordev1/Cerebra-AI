@@ -61,12 +61,16 @@ class CerebraWebInterface:
                     .message { margin-bottom: 10px; padding: 5px; }
                     .user-message { background: #d4edda; border-radius: 5px; }
                     .ai-message { background: #cce5ff; border-radius: 5px; }
-                    .input-area { display: flex; }
+                    .input-area { display: flex; flex-direction: column; }
+                    .input-row { display: flex; }
                     input[type="text"] { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
                     button { padding: 10px 20px; margin-left: 10px; border: none; background: #007bff; color: white; border-radius: 5px; cursor: pointer; }
                     button:hover { background: #0056b3; }
                     select { padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-right: 10px; }
                     .status { padding: 10px; background: #e2e3e5; border-radius: 5px; margin-bottom: 10px; }
+                    .options { display: flex; align-items: center; margin-bottom: 10px; }
+                    .checkbox-container { display: flex; align-items: center; margin-right: 15px; }
+                    .checkbox-container input { margin-right: 5px; }
                 </style>
             </head>
             <body>
@@ -74,14 +78,22 @@ class CerebraWebInterface:
                     <h1>Cerebra AI Web Interface</h1>
                     <div class="status" id="status">Состояние: Готов к работе</div>
                     <div class="chat-box" id="chat-box"></div>
-                    <div class="input-area">
+                    <div class="options">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="web-search">
+                            <label for="web-search">Веб-поиск</label>
+                        </div>
                         <select id="model-select">
-                            <option value="L1">Synthesis-L1 (~29M параметров)</option>
-                            <option value="L2">Synthesis-L2 (~220M параметров)</option>
-                            <option value="L3">Synthesis-L3 (~1.3B параметров)</option>
+                            <option value="L1">Synthesis-L1 (~7M параметров)</option>
+                            <option value="L2">Synthesis-L2 (~17M параметров)</option>
+                            <option value="L3">Synthesis-L3 (~50M параметров)</option>
                         </select>
-                        <input type="text" id="message-input" placeholder="Введите сообщение..." onkeypress="if(event.key==='Enter') sendMessage()">
-                        <button onclick="sendMessage()">Отправить</button>
+                    </div>
+                    <div class="input-area">
+                        <div class="input-row">
+                            <input type="text" id="message-input" placeholder="Введите сообщение..." onkeypress="if(event.key==='Enter') sendMessage()">
+                            <button onclick="sendMessage()">Отправить</button>
+                        </div>
                     </div>
                 </div>
                 
@@ -89,6 +101,7 @@ class CerebraWebInterface:
                     const chatBox = document.getElementById('chat-box');
                     const messageInput = document.getElementById('message-input');
                     const modelSelect = document.getElementById('model-select');
+                    const webSearchCheckbox = document.getElementById('web-search');
                     const statusDiv = document.getElementById('status');
                     
                     let socket;
@@ -140,10 +153,12 @@ class CerebraWebInterface:
                         if (!message) return;
                         
                         const modelType = modelSelect.value;
+                        const useWebSearch = webSearchCheckbox.checked;
                         
                         const data = {
                             message: message,
-                            model_type: modelType
+                            model_type: modelType,
+                            use_web_search: useWebSearch
                         };
                         
                         socket.send(JSON.stringify(data));
@@ -175,6 +190,7 @@ class CerebraWebInterface:
                     
                     user_message = message_data.get("message", "")
                     model_type = message_data.get("model_type", "L1")
+                    use_web_search = message_data.get("use_web_search", False)
                     
                     # Отправляем сообщение пользователя
                     await websocket.send_text(json.dumps({
@@ -183,7 +199,11 @@ class CerebraWebInterface:
                     }))
                     
                     # Генерируем ответ от AI
-                    ai_response = self.cerebra_ai.generate_response(user_message, model_type)
+                    try:
+                        ai_response = self.cerebra_ai.generate_response(user_message, model_type, use_web_search=use_web_search, use_plugins=True)
+                    except Exception as e:
+                        logger.error(f"Ошибка при генерации ответа: {e}")
+                        ai_response = f"Извините, произошла ошибка при обработке запроса: {str(e)}"
                     
                     # Отправляем ответ от AI
                     await websocket.send_text(json.dumps({

@@ -8,19 +8,26 @@ __pycache__/
 env/
 venv/
 .venv/
-pip-log.txt
-pip-delete-this-directory.txt
-.tox/
+.venv-*/
+.ENV/
+.env
+.env.local
+.env.*
+.ENV.*
+.venv.bak/
+.venv-*/
+
+
+# Logs
+*.log
+
+# Coverage
 .coverage
 .coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.log
-.pytest_cache/
-.mypy_cache/
-.hypothesis/
+htmlcov/
+.coveragerc
+.tox/
+.nox/
 
 # Distribution / packaging
 .Python
@@ -39,13 +46,13 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
 
-# Environment
-.env
-.venv
-env/
-venv/
-ENV/
+# Pytest
+.pytest_cache/
+
+# Mypy
+.mypy_cache/
 
 # IDE
 .vscode/
@@ -53,11 +60,11 @@ ENV/
 *.swp
 *.swo
 *~
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.*
 ```
-WEB_APP_GUIDE.md
-start_web.sh
-test_web_app.py
-web_app.py
-web_requirements.txt
-README.md
-cpu_requirements.txt
