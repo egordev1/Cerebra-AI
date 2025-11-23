@@ -1,3 +1,3 @@
-from .core import Cerebra
+from .core import CerebraAI
 
-ai = Cerebra()
+ai = CerebraAI()
