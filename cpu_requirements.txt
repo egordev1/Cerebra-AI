@@ -1,5 +1,8 @@
 # CPU-only requirements for AMD GPU compatibility
-torch>=2.0.0+cpu
+--index-url https://download.pytorch.org/whl/cpu
+torch>=2.0.0
+torchvision>=0.15.0
+torchaudio>=2.0.0
 numpy>=1.21.0
 requests>=2.28.0
 beautifulsoup4>=4.11.0
